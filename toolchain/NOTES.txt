@@ -1,0 +1,108 @@
+starlark rules_cc
+    load("@rules_cc//cc:cc_toolchain_config_lib.bzl", "tool")
+
+Using action_config https://bazel.build/docs/cc-toolchain-config-reference#using-action-config, defined in rules_cc/cc/cc_toolchain_config_lib.bzl
+
+"An action config corresponds to a Bazel action, and allows selection of a tool based on activated features. Action config activation occurs by the same semantics as features: a feature can 'require' or 'imply' an action config in the same way that it would another feature."
+
+Tool constructor: same
+
+
+To define an llvm tc:
+
+* get a CcToolchainConfigInfo
+  * from cc_common.create_cc_toolchain_config_info() https://bazel.build/rules/lib/toplevel/cc_common#create_cc_toolchain_config_info
+  * maybe outdated: https://bazel.build/docs/cc-toolchain-config-reference#cctoolchainconfiginfo-reference
+
+* pass CcToolchainConfigInfo as toolchain_config attr
+  of cc_toolchain rule
+* the cc_toolchain target is referenced by the tc-selector
+  ("toolchain(...)")
+
+* cc_toolchain selected passes info to rules via provider CcToolchainInfo (not CcToolchainConfigInfo) https://bazel.build/rules/lib/providers/CcToolchainInfo
+
+* rules create CcInfo providers
+
+So we have:
+
+* tc selector registered with bazel (by register_toolchains())
+* references cc_toolchain target, which "binds" implementation stuff to the tc interface (CcToolchainInfo)
+* cc_toolchain configured via CcToolchainConfigInfo
+
+Compare:
+
+* cc_toolchain args (like 'compiler', 'compiler_files')
+* CcToolchainInfo members (like 'compiler', other executables, etc.);
+* cc_commmon.create_cc_toolchain_config_info args ('compiler', 'tool_paths', etc.)
+
+E.g. cc_toolchain attr 'ar_files' v. CcToolchainInfo's 'ar_executable'
+
+grailbio calls 'cc_toolchain_config', a rule in "@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl", which in turn calls (and returns result of) cc_common.create_cc_toolchain_config_info. It adds features etc.
+
+So grailbio generates buildfiles that make these calls - one to cc_common.create_cc_toolchain_config_info (via cc_toolchain_config), one to cc_toolchain, one to toolchain().
+
+
+grailbio
+
+from llvm_config_impl (configure.bzl), which is
+th impl for 'toolchain' repo rule,
+called from llvm_toolchain() (in rules.bzl)
+called from llvm extension
+
+    # BUILD file with all the generated toolchain definitions.
+    rctx.template(
+        "BUILD.bazel",
+        rctx.attr._build_toolchain_tpl,
+        {
+            "%{cc_toolchain_config_bzl}": str(rctx.attr._cc_toolchain_config_bzl),
+            "%{cc_toolchains}": cc_toolchains_str,
+            "%{symlinked_tools}": symlinked_tools_str,
+            "%{wrapper_bin_prefix}": wrapper_bin_prefix,
+            "%{convenience_targets}": convenience_targets_str,
+        },
+    )
+
+
+
+    toolchain_info = struct(
+        os = os,
+        arch = arch,
+        llvm_dist_label_prefix = llvm_dist_label_prefix,
+        llvm_dist_path_prefix = llvm_dist_path_prefix,
+        tools_path_prefix = tools_path_prefix,
+        wrapper_bin_prefix = wrapper_bin_prefix,
+        sysroot_paths_dict = sysroot_paths_dict,
+        sysroot_labels_dict = sysroot_labels_dict,
+        target_settings_dict = rctx.attr.target_settings,
+        additional_include_dirs_dict = rctx.attr.cxx_builtin_include_directories,
+        stdlib_dict = rctx.attr.stdlib,
+        cxx_standard_dict = rctx.attr.cxx_standard,
+        compile_flags_dict = rctx.attr.compile_flags,
+        cxx_flags_dict = rctx.attr.cxx_flags,
+        link_flags_dict = rctx.attr.link_flags,
+        link_libs_dict = rctx.attr.link_libs,
+        opt_compile_flags_dict = rctx.attr.opt_compile_flags,
+        opt_link_flags_dict = rctx.attr.opt_link_flags,
+        dbg_compile_flags_dict = rctx.attr.dbg_compile_flags,
+        coverage_compile_flags_dict = rctx.attr.coverage_compile_flags,
+        coverage_link_flags_dict = rctx.attr.coverage_link_flags,
+        unfiltered_compile_flags_dict = rctx.attr.unfiltered_compile_flags,
+        llvm_version = llvm_version,
+    )
+
+
+grailbio compiler config attrs:
+
+sysroot
+    "cxx_builtin_include_directories": attr.string_list_dict(
+    "stdlib": attr.string_dict(
+
+
+cc_toolchain_config - a rule from unix_cc_toolchain_config.bzl,
+that does
+
+    return cc_common.create_cc_toolchain_config_info(...)
+
+this is passed to the 'toolchain_config' attr of the cc_toolchain rule
+
+

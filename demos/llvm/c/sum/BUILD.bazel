@@ -1,0 +1,29 @@
+load("@llvm//:CONFIG.bzl",
+     "CPPFLAGS", "CFLAGS", "CDEFINES", "LDFLAGS")
+
+COPTS = CPPFLAGS + CFLAGS
+LLVM_LINKOPTS = [] # "-lncurses"]
+LLVM_DEFINES = []
+
+cc_binary(
+    name = "sum",
+    srcs = ["sum.c"],
+    copts = COPTS + [
+        # "$(LLVM_CPPFLAGS)",
+        # "$(LLVM_CFLAGS)",
+        "-x", "c",
+        "-std=c11",
+        "-I$(@llvm_c_sdk)/include",
+    ],
+    linkopts = LDFLAGS + LLVM_LINKOPTS,
+    local_defines  = CDEFINES,
+    deps = [
+        "@ncurses//:libncurses",
+        "@zlib//:zlib",
+        "@zstd//:zstd",
+        "@llvm_c_sdk//include",
+        "@llvm_c_sdk//lib:all-libs",
+        # "@llvm_c_sdk//lib:LLVM", # shared lib?
+    ],
+    toolchains = ["//:repo_paths"]
+)

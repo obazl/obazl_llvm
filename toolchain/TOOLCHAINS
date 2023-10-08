@@ -1,0 +1,36 @@
+
+link:https://bazel.build/reference/be/c-cpp#cc_toolchain[C/C++ Rules]
+
+link:https://bazel.build/extending/toolchains[Toolchains]
+
+link:https://github.com/bazelbuild/bazel/issues/7260[incompatible_enable_cc_toolchain_resolution: Turn on toolchain resolution for cc rules] CRITICAL
+
+link:https://github.com/bazelbuild/rules_cc/tree/main/examples[rules_cc examples]
+
+link:https://github.com/bazelbuild/rules_cc[the starlark impl of rules_cc]
+
+link:https://bazel.build/docs/cc-toolchain-config-reference[C++ Toolchain Configuration]
+
+link:https://bazel.build/tutorials/ccp-toolchain-config[Bazel Tutorial: Configure C++ Toolchains]
+
+link:https://bazel.build/configure/integrate-cpp[Integrating with C++ rules]
+
+find_cpp_toolchain - deprecated, use find_cc_toolchain (from rules_cc),
+use_cpp_toolchain, etc:
+
+legacy helpers:
+link:https://github.com/bazelbuild/bazel/blob/master/tools/cpp/toolchain_utils.bzl[bazelbuild/..../toolchain_utils.bzl] Helper stuff
+
+starlark version:
+https://github.com/bazelbuild/rules_cc/blob/main/cc/find_cc_toolchain.bzl
+
+obsolete:
+
+link:https://docs.bazel.build/versions/1.2.0/tutorial/cc-toolchain-config.html[Configuring C++ toolchains] (v 1.2.0)
+
+
+migration:
+
+https://github.com/bazelbuild/bazel/issues/7260
+
+https://github.com/tweag/rules_nixpkgs/issues/289

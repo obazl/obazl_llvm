@@ -1,0 +1,21 @@
+load("@cc_config//:MACROS.bzl", "repo_paths")
+
+load("@bazel_skylib//rules:common_settings.bzl", "string_setting")
+
+string_setting(name = "version",
+               build_setting_default = "17.0.1")
+
+PROD_REPOS = [
+    "@clang_c_sdk//version",
+]
+
+repo_paths(
+    name = "repo_paths",
+    repos = PROD_REPOS
+)
+
+repo_paths(
+    name = "test_repo_paths",
+    repos = PROD_REPOS + [
+    ]
+)

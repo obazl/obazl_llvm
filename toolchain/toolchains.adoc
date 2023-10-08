@@ -1,0 +1,126 @@
+= toolchains
+:toc: true
+
+Bazel toolchains involve two parts, a selector and an adapter.
+
+Each `toolchain_selector` references an adapter, and expresses the
+constraints that must be satisfied in order for Bazel to select the
+adapter. In this module, `toolchain_selector` is a macro that calls
+`native.toolchain`.
+
+A toolchain adapter binds a toolchain implementation (executables,
+libraries, headers, etc.) to the `CcToolchainInfo` provider used by
+the CC rules in `rules_cc`.
+
+[IMPORTANT]
+.Naming conventions
+====
+We deviate from legacy naming conventions:
+
+* We wrap the call to `toolchain()` in macro `toolchain_selector`
+* Our toolchain rule is `llvm_toolchain_adapter` instead of `cc_toolchain_config`
+====
+
+
+== Overview
+
+=== UI
+
+Roughly:
+
+[source=python,title="MODULE.bazel"]
+----
+    bazel_dep(name = "obazl_llvm", version = "x.y.z")
+    llvm = use_extension("@obazl_llvm//extensions:llvm.bzl", "llvm")
+    llvm.config()
+    register_toolchains("@llvm//toolchain:all")
+----
+
+=== Toolchain selectors
+
+[source=python,title="toolchain/BUILD.bazel"]
+----
+load("@llvm//toolchain:selector.bzl", "toolchain_selector")
+toolchain_selector(
+    name      = "arm",
+    toolchain = "@llvm//toolchain/adapters:arm",
+    build_host_constraints  = [
+    ... "exec_compatible_with" constraints
+    ],
+    target_host_constraints  = [
+    ... "target_compatible_with" constraints
+    ],
+    toolchain_constraints = [
+    ... "target_settings" config_settings
+    ],
+    visibility     = ["//visibility:public"],
+)
+toolchain_selector(name = "x86_64" ...)
+...
+----
+
+Macro definition:
+[source=python,title="toolchain/selector.bzl"]
+----
+def toolchain_selector(name, toolchain,
+                       toolchain_type = "@llvm//toolchain/type:std",
+                       build_host_constraints=None,
+                       target_host_constraints=None,
+                       toolchain_constraints=None,
+                       visibility = ["//visibility:public"]):
+    native.toolchain(
+        name                   = name,
+        toolchain              = toolchain,
+        toolchain_type         = toolchain_type,
+        exec_compatible_with   = build_host_constraints,
+        target_settings        = toolchain_constraints,
+        target_compatible_with = target_host_constraints,
+        visibility             = visibility
+    )
+----
+
+
+
+
+=== Toolchain adapters
+
+[source=python,title="toolchain/adapters/BUILD.bazel"]
+----
+load("@llvm//toolchain:adapter.bzl", "llvm_toolchain_adapter")
+llvm_toolchain_adapter(
+    name                   = "arm",
+    toolchain_identifier = "arm",
+    compiler               = "...",
+    ...
+)
+----
+
+
+Rule `llvm_toolchain_adapter` definition:
+
+[source=python,title="toolchain/adapter.bzl"]
+----
+def _llvm_toolchain_adapter_impl(ctx):
+    ...
+    features = ...
+    ...
+    return cc_common.create_cc_toolchain_config_info(
+        ctx = ctx,
+        features = features,
+        ...
+    )
+
+
+llvm_toolchain_adapter = rule(
+    _llvm_toolchain_adapter_impl,
+    doc = "Defines an llvm toolchain.",
+    attrs = {
+        "abi_libc_version": attr.string(mandatory = True),
+        "abi_version": attr.string(mandatory = True),
+        "compile_flags": attr.string_list(),
+        "compiler": attr.string(mandatory = True),
+        ...
+   },
+    provides = [CcToolchainConfigInfo]
+)
+

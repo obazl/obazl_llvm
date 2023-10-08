@@ -1,0 +1,31 @@
+= llvm
+llvm bazel module(s)
+
+WARNING: Experimental. Not stable.
+
+== building llvm
+
+
+examples:
+
+    cmake -S llvm -B .build.16.0.6 -G Ninja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=polly -DLLVM_ENABLE_BINDINGS=0 -DLLVM_BUILD_LLVM_DYLIB=ON
+
+
+* `-B` controls the build output directory. Makes it easy to build multiple versions of the compiler.
+* `-DLLVM_ENABLE_PROJECTS=polly` - needed for the ocaml sdk?
+* `-DLLVM_ENABLE_BINDINGS=0` - we're going to build the bindings so we do not want ninja to do it
+
+"LLVM does not support generating component dylibs and shared libs. It
+supports generating libLLVM, a single dylib containing all of the LLVM
+components rolled together. libunwind, libcxx, libcxxabi, are runtime
+libraries that are designed to allow static linkage, and they don't
+link LLVM." (link:https://reviews.llvm.org/D61804[])
+
+So you can link to libLLVM.[so,dylib], or you can statically link to
+the individual libs like libLLVMBitreader.a, etc. The shared lib is
+not built by default. To build it:
+
+
+* `-DLLVM_BUILD_LLVM_DYLIB=ON` - tells the build to produce `lib/libLLVM.dylib` (or `.so`).
+* Do not use `-BUILD_SHARED_LIBS`
+

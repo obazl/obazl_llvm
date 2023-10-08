@@ -1,0 +1,79 @@
+module(
+    name = "demos",
+    # version of this module, not llvm
+    version = "1.0.0",
+    compatibility_level = 1,
+    bazel_compatibility = [">=6.0.0"]
+)
+
+bazel_dep(name = "llvm")
+local_path_override(
+    module_name = "llvm",
+    path = "../../..",
+)
+
+llvm_config = use_extension(
+    "@llvm//extensions:llvm.bzl",
+    "llvm_config"
+)
+
+LLVM_VERSION = "17.0.1"
+
+llvm_config.llvm(
+    ## only for downloading
+    version = LLVM_VERSION,
+    # extension detects whether llvm_root
+    # points to a distro or a local src build
+
+    # @demos won't work, with:
+    # llvm_root = "@demos//.config/llvm:root"
+    # we get:
+    # @@[unknown repo 'demos' requested from @llvm~override]//.config/llvm:root
+
+    # why? this fn llvm_config.llvm is from @llvm (which is
+    # overridden)
+
+    ## so to use local .config/llvm:root use @@:
+    llvm_root = "@@//.config/llvm:demos_root"
+
+    ## single @// also won't work, it will be interpreted
+    ## relative to @llvm~override
+)
+
+use_repo(llvm_config, "llvm_config", "llvm_tools")
+
+llvm_config.llvm_c_sdk()
+use_repo(llvm_config, "llvm_c_sdk")
+
+# use_repo(llvm_sdk,
+#          "llvm_tools",
+#          "llvm_c_sdk",
+#          ocaml_llvm = "llvm_ocaml_sdk")
+
+llvm_config.clang_c_sdk()
+use_repo(llvm_config, "clang_c_sdk")
+
+################################
+# clang = use_extension(
+#     "@llvm//extensions:clang.bzl",
+#     "clang"
+# )
+
+# clang.c_sdk()
+# use_repo(clang, "clang_c_sdk")
+
+################################################################
+bazel_dep(name = "platforms",    version = "0.0.7")
+bazel_dep(name = "bazel_skylib", version = "1.4.2")
+bazel_dep(name = "cc_config",    version = "1.0.0")
+
+# bazel_dep(name = "obazl",           version = "1.0.0",
+#           dev_dependency = True)
+
+# bazel_dep(name = "ncurses", version = "6.4")
+# # on macos, ncurses comes with the sdks,
+# # so linker knows where to search
+
+# bazel_dep(name = "zlib", version = "1.3")
+
+bazel_dep(name = "zstd", version = "1.5.5")

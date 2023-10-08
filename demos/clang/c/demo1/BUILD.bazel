@@ -1,0 +1,41 @@
+load("@llvm_tools//:CONFIG.bzl",
+     "CPPFLAGS", "CFLAGS", "CDEFINES",
+     "LDFLAGS", "SYSLIBS")
+
+COPTS = CPPFLAGS + CFLAGS
+LLVM_LINKOPTS =  [] # SYSLIBS # ["--verbose", "-Wl,-v"]
+LLVM_DEFINES = []
+
+cc_binary(
+    name = "demo1",
+    srcs = ["demo1.c"],
+    copts = COPTS + [
+        # "$(LLVM_CPPFLAGS)",
+        # "$(LLVM_CFLAGS)",
+        # "-x", "c",
+        # "-std=c11",
+        "-I$(@clang_c_sdk)/include",
+    ],
+    linkopts = LDFLAGS + LLVM_LINKOPTS,
+    local_defines  = CDEFINES,
+    deps = [
+        # "@zstd//:zstd",
+        "@clang_c_sdk//include",
+        "@clang_c_sdk//lib:clang",
+    ],
+    linkstatic = True,
+    toolchains = ["//:repo_paths"],
+)
+
+genrule(
+    name = "genast",
+    srcs = ["foo.c"],
+    outs = ["foo.ast"],
+    tools = ["@llvm_tools//bin:clang"],
+    cmd = " ".join([
+        "$(execpath @llvm_tools//bin:clang)",
+        "-x", "c",
+        "-o", "$@",
+        "$(location foo.c)",
+    ])
+)

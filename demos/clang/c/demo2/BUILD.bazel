@@ -1,0 +1,25 @@
+load("@llvm//:CONFIG.bzl",
+     "CPPFLAGS", "CFLAGS", "CDEFINES", "LDFLAGS")
+
+COPTS = CPPFLAGS + CFLAGS
+LLVM_LINKOPTS = ["-lncurses"] # ["--verbose", "-Wl,-v"]
+LLVM_DEFINES = []
+
+cc_binary(
+    name = "demo2",
+    srcs = ["demo2.cc"],
+    data = ["header.hpp"],
+    copts = COPTS + [
+        # "$(LLVM_CPPFLAGS)",
+        # "$(LLVM_CFLAGS)",
+        "-I$(@clang_c_sdk)/include",
+    ],
+    linkopts = LDFLAGS + LLVM_LINKOPTS,
+    local_defines  = CDEFINES,
+    deps = [
+        "@clang_c_sdk//include",
+        "@clang_c_sdk//lib:clang",
+    ],
+    linkstatic = True,
+    toolchains = ["//:repo_paths"],
+)
