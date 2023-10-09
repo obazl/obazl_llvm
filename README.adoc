@@ -120,6 +120,13 @@ Integrates `libclang`.
 Not yet implemented.
 
 
+=== other sdks
+
+There's no reason all the other sdks supported by llvm could not be accomodated by this modular design.
+
+* `@mlir_c_sdk` (link:https://mlir.llvm.org/docs/CAPI/[mlir c api])
+* etc.
+
 == repo_paths
 
 To enable module name make variables (like `"$(@llvm_c_sdk)"`) you can
