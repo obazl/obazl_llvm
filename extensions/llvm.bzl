@@ -134,7 +134,7 @@ def _emit_config_file(mctx, sysroot, llvm_root, llvm_version, llvm_config_tool, 
         #     cdefines.append(flag) # flag[2:])
         elif flag == "": continue
         else: cflags.append(flag)
-    print("CFLAGS: %s" % cflags)
+    # print("CFLAGS: %s" % cflags)
 
     cxxflags = []
     cxxdefines = []

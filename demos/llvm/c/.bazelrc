@@ -1,21 +1,13 @@
 common --incompatible_enable_cc_toolchain_resolution
 common --experimental_cc_shared_library
-common --enable_bzlmod
+common --symlink_prefix=.bazel/
 
 # common --macos_sdk_version=13.3.0
-common --macos_minimum_os=13.6
-common --host_macos_minimum_os=13.6
+# common --macos_minimum_os=13.6
+# common --host_macos_minimum_os=13.6
 
-try-import %workspace%/.config/toolchains.bazelrc
-try-import %workspace%/.config/platform.bazelrc
-
-try-import %workspace%/.config/coswitch_registry.bazelrc
-try-import %workspace%/.config/registries.bazelrc
-# always --registry=https://raw.githubusercontent.com/obazl/registry/main/
+common --enable_bzlmod
+always --registry=https://raw.githubusercontent.com/obazl/registry/main/
 always --registry=https://bcr.bazel.build
-
-# Tell Bazel to pass the right flags for llvm-ar, not libtool. Only needed if you are building on darwin.
-# See https://github.com/bazelbuild/bazel/blob/5c75d0acec21459bbb13520817e3806e1507e907/tools/cpp/unix_cc_toolchain_config.bzl#L1000-L1024
-build --features=-libtool
 
 try-import .config/user.bazelrc

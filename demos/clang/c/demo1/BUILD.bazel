@@ -12,7 +12,7 @@ cc_binary(
     copts = COPTS + [
         # "$(LLVM_CPPFLAGS)",
         # "$(LLVM_CFLAGS)",
-        # "-x", "c",
+        "-x", "c",
         # "-std=c11",
         "-I$(@clang_c_sdk)/include",
     ],
