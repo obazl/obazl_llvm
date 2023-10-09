@@ -3,7 +3,7 @@
 
 llvm bazel module(s)
 
-WARNING: Experimental. Not stable.
+WARNING: Experimental. Not stable. **Only tested on MacOS.**
 
 == overview
 
@@ -12,6 +12,131 @@ WARNING: Experimental. Not stable.
   `@llvm_c_sdk`, `llvm_ocaml_sdk`, etc.
 
 * toolchain and sdks are independent. You can use an sdk with whatever toolchain you want; you don't have to use the llvm/clang toolchain.
+
+
+== @llvm
+
+This submodule configures an llvm installation for use by the SDK submodules described below.  It also contains an option toolchain llvm/clang toolchain.
+
+.MODULE.bazel
+----
+bazel_dep(name = "obazl_llvm", version = "x.y.z")
+llvm = use_extension("@obazl_llvm//extensions:llvm.bzl", "llvm")
+llvm.config(llvm_root = "@@//.config/llvm:root")                   <1>
+use_repo(llvm, "llvm")
+register_toolchains("@llvm//toolchain:all")                        <2>
+----
+<1> `llvm_root` label of file containing path to llvm installation
+<2> Optional. You can use the SDKs this module provides with your local CC toolchain; using the llvm/clang toolchain is opt-in.
+
+.config/llvm/root
+----
+/path/to/llvm-installation
+----
+
+Here `llvm-installation` can be a binary distribution or a source
+distribution that you have built.
+
+The function of `llvm.config(llvm_root = ...)` is analogous to the
+function of `try-import` in a bazelrc file: it reads the file if it
+exists, and ignores it if not. This allows you to integrate a prebuilt
+llvm installation.
+
+CAUTION: The intended (but not yet implemented) default is to download
+a distribution if `llvm_root` is omitted, or the file does not exist.
+Currently you can only use this module with a local llvm installation.
+
+== Toolchain
+
+Brand new, may be flaky, but seems to work for the demos
+
+== SDKs
+
+NOTE: Currently the SDKs are implemented as separate Bazel modules
+that use symlinks to piggy-back on the configuration set up by
+`@llvm`. Another option would be to put everything in the `@llvm`
+namespace, so we would have something like `@llvm//sdk/llvm/c` instead
+of `@llvm_c_sdk`, `@llvm//sdk/clang/c` instead of `@clang_c_sdk`, etc.
+
+=== @llvm_c_sdk
+
+
+.MODULE.bazel
+----
+llvm.llvm_c_sdk()
+use_repo(llvm, "llvm_c_sdk")
+----
+
+.demos/llvm/c/hello/BUILD.bazel
+----
+cc_binary(
+    name = "hello",
+    srcs = ["hello.c"],
+    deps = [
+        "@llvm_c_sdk//include",
+        "@llvm_c_sdk//lib:LLVMBinaryFormat",
+        "@llvm_c_sdk//lib:LLVMBitstreamReader",
+        "@llvm_c_sdk//lib:LLVMCore",
+        "@llvm_c_sdk//lib:LLVMDemangle",
+        "@llvm_c_sdk//lib:LLVMRemarks",
+        "@llvm_c_sdk//lib:LLVMSupport",
+        "@llvm_c_sdk//lib:LLVMTargetParser",
+        # OR:  "@llvm_c_sdk//lib:all-libs",
+    ],
+    copts = [
+        "-I$(@llvm_c_sdk)/include",           <1>
+            ...
+    ],
+    ...
+    toolchains = ["//:repo_paths"]            <1>
+)
+----
+<1> The demos use a utility tool that defines make variables for
+module names; in this case, `"$(@llvm_c_sdk)"` expands to
+`+external/obazl_llvm~override~llvm~llvm_c_sdk+`. See `repo_paths`
+below for more information.
+
+
+=== @llvm_c++_sdk
+
+Not yet implemented
+
+=== @clang_c_sdk
+
+Integrates `libclang`.
+
+=== @clang_c++_sdk
+
+Not yet implemented.
+
+
+== repo_paths
+
+To enable module name make variables (like `"$(@llvm_c_sdk)"`) you can
+use link:https://github.com/obazl/cc_config[cc_config] as follows:
+
+.MODULE.bazel
+----
+bazel_dep(name = "cc_config",    version = "1.0.0")
+----
+
+Then in any build file add the following:
+
+.BUILD.bazel
+----
+load("@cc_config//:MACROS.bzl", "repo_paths")
+repo_paths(
+    name = "repo_paths",
+    repos = ["@llvm_c_sdk//version"])    <1>
+----
+<1> Items in the `repos` list may be any build target. The tool just
+uses it to obtain the expansion of the module name.
+
+Then to use the make variables in a `cc_*` target:
+
+----
+    toolchains = ["//:repo_paths"]
+----
 
 
 == building llvm

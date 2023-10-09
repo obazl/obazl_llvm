@@ -153,9 +153,6 @@ cc_library(
     rctx.symlink("{}/lib".format(wsroot), "lib")
     rctx.symlink("{}/libexec".format(wsroot), "libexec")
 
-    # print("CC: %s" % rctx.attr.components)
-    # fail("STOP")
-
     xarch = rctx.os.arch.lower()
     arch = archmap[xarch]
     # print("ARCH: %s" % arch)

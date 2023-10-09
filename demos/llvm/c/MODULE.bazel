@@ -48,11 +48,11 @@ ollvm.config(
     # hermetic = True # ??
 )
 use_repo(ollvm, "llvm")
+register_toolchains("@llvm//toolchain:all")
 
 ollvm.llvm_c_sdk()
 use_repo(ollvm, "llvm_c_sdk")
 
-register_toolchains("@llvm//toolchain:all")
 
 # llvm_config.ocaml_sdk(
 #     # version = LLVM_VERSION,

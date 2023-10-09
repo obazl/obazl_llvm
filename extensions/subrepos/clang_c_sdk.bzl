@@ -83,9 +83,9 @@ cc_import(name = "{libname}",
 
 ###########################
 def _clang_c_sdk_impl(rctx):
-    print("LLVM_SDK REPO RULE")
+    # print("LLVM_SDK REPO RULE")
 
-    print("LLVM_ROOT %s" % rctx.attr.llvm_root)
+    # print("LLVM_ROOT %s" % rctx.attr.llvm_root)
 
     rctx.file(
         "MODULE.bazel",
@@ -197,29 +197,19 @@ cc_library(
     # rctx.symlink("{root}/libcxx/include".format(root=wsroot),
     #              "sdk/c++/include")
 
-    rctx.symlink("{root}/lib".format(
-        root=wsroot,
-        bld=rctx.attr.llvm_root),
-                 "lib")
+    rctx.symlink("{}/lib".format(wsroot), "lib")
+    rctx.symlink("{}/libexec".format(wsroot), "libexec")
 
-    rctx.symlink("{root}/libexec".format(
-        root=wsroot,
-        bld=rctx.attr.llvm_root),
-                 "libexec")
-
-    # print("CC: %s" % rctx.attr.components)
-    # fail("STOP")
-
-    libsmap = genlibsmap(rctx,
-                         rctx.attr.components,
-                         rctx.attr.libs)
-    rctx.template(
-        "lib/BUILD.bazel",
-        # "BUILD.lib",
-        Label(":BUILD.clang_libs"),
-        substitutions = libsmap,
-        executable = False,
-    )
+    # libsmap = genlibsmap(rctx,
+    #                      rctx.attr.components,
+    #                      rctx.attr.libs)
+    # rctx.template(
+    #     "lib/BUILD.bazel",
+    #     # "BUILD.lib",
+    #     Label("//extensions/templates:clang_libs.BUILD"),
+    #     substitutions = libsmap,
+    #     executable = False,
+    # )
 
     xarch = rctx.os.arch.lower()
     arch = archmap[xarch]

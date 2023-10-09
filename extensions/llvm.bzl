@@ -1,7 +1,7 @@
 load("//extensions/subrepos:llvm.bzl", "repo_llvm")
 load("//extensions/subrepos:llvm_c_sdk.bzl", "repo_llvm_c_sdk")
 load("//extensions/subrepos:llvm_ocaml_sdk.bzl", "repo_llvm_ocaml_sdk")
-load("//extensions/subrepos:llvm_tools.bzl", "repo_llvm_tools")
+# load("//extensions/subrepos:llvm_tools.bzl", "repo_llvm_tools")
 
 load("//extensions/subrepos:clang_c_sdk.bzl", "repo_clang_c_sdk")
 
@@ -9,7 +9,7 @@ load("//extensions/subrepos:clang_c_sdk.bzl", "repo_clang_c_sdk")
 
 ################
 def _builtin_include_dirs(mctx, sysroot, llvm_root, version):
-    print("LLVM_ROOT: %s" % llvm_root)
+    # print("LLVM_ROOT: %s" % llvm_root)
 
     ## NOTE the trailing '/' !!!
 
@@ -172,7 +172,7 @@ def _emit_config_file(mctx, sysroot, llvm_root, llvm_version, llvm_config_tool, 
         fail("FAIL: llvm-config --targets-built")
 
     builtin_include_dirs = _builtin_include_dirs(mctx, sysroot, llvm_root, llvm_version)
-    print("BUILTIN INC: %s" % builtin_include_dirs)
+    # print("BUILTIN INC: %s" % builtin_include_dirs)
 
     # make_variables = [
     #     make_variable(
@@ -188,7 +188,7 @@ load("@rules_cc//cc:cc_toolchain_config_lib.bzl", "make_variable")
 CPPFLAGS = {cppflags}
 CPPDEFINES = {cppdefines}
 
-# CFLAGS = {cflags}
+CFLAGS = {cflags}
 CDEFINES = {cdefines}
 
 CXXFLAGS = {cxxflags}
@@ -561,19 +561,19 @@ string_setting(
     #         targets = targets
     #     )
 
-    # if clang_c_sdk:
-    #     repo_clang_c_sdk(
-    #         name = "clang_c_sdk",
-    #         version = llvm_version,
-    #         compatibility_level = compatibility_level,
-    #         version_file = str(vfile),
-    #         llvm_root = llvm_root,
-    #         llvm = "@llvm",
-    #         targets = targets,
-    #         components = components,
-    #         libs = libs,
-    #         is_distro = is_distro
-    #     )
+    if clang_c_sdk:
+        repo_clang_c_sdk(
+            name = "clang_c_sdk",
+            version = llvm_version,
+            compatibility_level = compatibility_level,
+            version_file = str(vfile),
+            llvm_root = llvm_root,
+            llvm = "@llvm",
+            targets = targets,
+            components = components,
+            libs = libs,
+            is_distro = is_distro
+        )
 
 ##############################
 llvm = module_extension(

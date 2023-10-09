@@ -152,8 +152,10 @@ bazel_dep(name = "rules_cc", version = "0.0.9")
     ## toolchains ##
     tcmap = {
         "{{tc_id}}": rctx.attr.host_triple,
-        "{{target_system_name}}": rctx.attr.host_triple,
-        "{{sysroot}}": rctx.attr.sysroot
+        "{{target_system_name}}": "darwin_arm64", # rctx.attr.host_triple,
+        "{{host_system_name}}": "darwin_arm64", # rctx.attr.host_triple,
+        "{{sysroot}}": rctx.attr.sysroot,
+        "{{cpu}}": "darwin_arm64" # rctx.os.arch
     }
 
     ## llvm cc toolchain type

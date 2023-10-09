@@ -395,7 +395,10 @@ def make_features(ctx):
                             ),
                             flag_group(
                                 flags = [
-                                    "-Wl,-rpath,$ORIGIN/%{runtime_library_search_directories}",
+                                    # mac:
+                                    "-Wl,-rpath,@loader_path/%{runtime_library_search_directories}",
+                                    # linux:
+                                    # "-Wl,-rpath,$ORIGIN/%{runtime_library_search_directories}",
                                 ],
                                 expand_if_false = "is_cc_test",
                             ),
@@ -416,7 +419,10 @@ def make_features(ctx):
                         flag_groups = [
                             flag_group(
                                 flags = [
-                                    "-Wl,-rpath,$ORIGIN/%{runtime_library_search_directories}",
+                                    # macos:
+                                    "-Wl,-rpath,@loader_path/%{runtime_library_search_directories}",
+                                    # linux:
+                                    # "-Wl,-rpath,$ORIGIN/%{runtime_library_search_directories}",
                                 ],
                             ),
                         ],

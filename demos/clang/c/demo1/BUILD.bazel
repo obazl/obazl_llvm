@@ -1,4 +1,4 @@
-load("@llvm_tools//:CONFIG.bzl",
+load("@llvm//:CONFIG.bzl",
      "CPPFLAGS", "CFLAGS", "CDEFINES",
      "LDFLAGS", "SYSLIBS")
 
@@ -23,19 +23,22 @@ cc_binary(
         "@clang_c_sdk//include",
         "@clang_c_sdk//lib:clang",
     ],
-    linkstatic = True,
+    # data = ["@clang_c_sdk//lib:clang"],
+    # linkstatic = True,
     toolchains = ["//:repo_paths"],
 )
 
-genrule(
+cc_library(
     name = "genast",
     srcs = ["foo.c"],
-    outs = ["foo.ast"],
-    tools = ["@llvm_tools//bin:clang"],
-    cmd = " ".join([
-        "$(execpath @llvm_tools//bin:clang)",
-        "-x", "c",
-        "-o", "$@",
-        "$(location foo.c)",
-    ])
+    copts = ["-emit-ast"]
+    # outs = ["foo.ast"],
+    # tools = ["@llvm//bin:clang"],
+    # cmd = " ".join([
+    #     "$(execpath @llvm//bin:clang)",
+    #     "-x", "c",
+    #     "-o", "$@",
+    #     "$(location foo.c)",
+    # ]),
+    # toolchains = ["@bazel_tools//tools/cpp:toolchain_type"]
 )

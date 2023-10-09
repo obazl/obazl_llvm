@@ -1,5 +1,15 @@
 package(default_visibility=["//visibility:public"])
 
+cc_library(
+    name = "clang",
+    alwayslink = True,
+    srcs = select({
+        "@platforms//os:macos": ["libclang.dylib"],
+        "@platforms//os:linux": ["libclang.os"],
+        "//conditions:default": ["libclang.os"],
+    })
+)
+
 filegroup(
     name = "link_libs",
     srcs = glob(
