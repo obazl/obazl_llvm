@@ -1,5 +1,38 @@
 # info on targets: llvm-project/docs/GettingStarted.rst
 
+#####################
+def genlibsmap(rctx, components, libs):
+
+    libsmap = {}
+
+    stanzas = ""
+
+    for component,clibs in components.items():
+
+        stanza = """
+cc_library(name = "{c}-libs",
+           srcs = [{libs}])
+""".format(c=component,
+           libs= ", ".join(clibs))
+
+        stanzas = stanzas + stanza
+
+    libsmap["{{COMPONENTS}}"] = stanzas
+
+    stanzas = ""
+
+    for libname,filename in libs.items():
+
+        stanza = """
+cc_import(name = "{libname}",
+          static_library = "{fname}")
+""".format(libname=libname, fname = filename)
+        stanzas = stanzas + stanza
+
+    libsmap["{{EVERY_LIB}}"] = stanzas
+
+    return libsmap
+
 ################
 def _emit_bin_files(rctx, bindir):
 
@@ -90,6 +123,32 @@ bazel_dep(name = "rules_cc", version = "0.0.9")
         executable = False,
     )
 
+    rctx.symlink("{}/include".format(rctx.attr.llvm_root),
+                 "include")
+    rctx.template(
+        "include/BUILD.bazel",
+        Label("//extensions/templates:include.BUILD"),
+        executable = False,
+    )
+
+    rctx.symlink("{}/lib".format(rctx.attr.llvm_root), "lib")
+
+    libsmap = genlibsmap(rctx,
+                         rctx.attr.components,
+                         rctx.attr.libs)
+    rctx.template(
+        "lib/BUILD.bazel",
+        Label("//extensions/templates:lib.BUILD"),
+        substitutions = libsmap,
+        executable = False,
+    )
+
+    # rctx.template(
+    #     "libx/BUILD.bazel",
+    #     Label("//extensions/templates:tc_linklibs.BUILD"),
+    #     executable = False,
+    # )
+
     ## toolchains ##
     tcmap = {
         "{{tc_id}}": rctx.attr.host_triple,
@@ -171,6 +230,6 @@ repo_llvm = repository_rule(
         "components": attr.string_list_dict(
             doc = "Key: component name; val: list of libs"
         ),
-        "libs": attr.string_list()
+        "libs": attr.string_dict()
     },
 )

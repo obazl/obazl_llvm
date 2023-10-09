@@ -1,7 +1,18 @@
-= llvm
+= obazl_llvm
+:toc:
+
 llvm bazel module(s)
 
 WARNING: Experimental. Not stable.
+
+== overview
+
+* the sole purpose of the primary module (`@obazl_llvm`) is to host
+  the extension that generates the subrepos that do the work: `@llvm`,
+  `@llvm_c_sdk`, `llvm_ocaml_sdk`, etc.
+
+* toolchain and sdks are independent. You can use an sdk with whatever toolchain you want; you don't have to use the llvm/clang toolchain.
+
 
 == building llvm
 

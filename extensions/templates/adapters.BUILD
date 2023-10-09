@@ -10,14 +10,14 @@ load("@llvm//:CONFIG.bzl",
 ########################
 llvm_toolchain_adapter(
     name = "{{tc_id}}",
-    all_files = "{{all_files}}",
-    ar_files = "{{ar_files}}",
-    as_files = "{{as_files}}",
-    compiler_files = "@llvm//bin:clang",
-    dwp_files = "{{dwp_files}}",
+    all_files = "@llvm//bin:all_files",
+    ar_files = "@llvm//bin:ar_files",
+    as_files = "@llvm//bin:as_files",
+    compiler_files = "@llvm//bin:compiler_files",
+    dwp_files = "@llvm//bin:dwp_files",
     linker_files = "@llvm//bin:linker_files",
-    objcopy_files = "{{objcopy_files}}",
-    strip_files = "{{strip_files}}",
+    objcopy_files = "@llvm//bin:objcopy_files",
+    strip_files = "@llvm//bin:strip_files",
     toolchain_config = ":{{tc_id}}-config"
 )
 
@@ -40,7 +40,7 @@ llvm_toolchain_configurator(
     # TODO: make that a feature?
     link_flags = ["-lc++", "-mmacos-version-min=13.6"],
     # link_libs =  ["@llvm//lib:libc++"],
-    # "opt_compile_flags": attr.string_list(),
+    # opt_compile_flags = [], # "-DNDEBUG"],
     # "opt_link_flags": attr.string_list(),
     # "supports_start_end_lib": attr.bool(),
     target_libc = "{{target_libc}}",

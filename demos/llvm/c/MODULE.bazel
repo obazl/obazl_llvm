@@ -12,7 +12,7 @@ local_path_override(
     path = "../../..",
 )
 
-llvm = use_extension(
+ollvm = use_extension(
     "@obazl_llvm//extensions:llvm.bzl",
     "llvm"
 )
@@ -20,7 +20,7 @@ llvm = use_extension(
 LLVM_VERSION = "17.0.1"
 
 #config distro v. config src build
-llvm.config(
+ollvm.config(
     ## only for downloading
     version = LLVM_VERSION,
     # extension detects whether llvm_root
@@ -47,10 +47,10 @@ llvm.config(
     #or
     # hermetic = True # ??
 )
-use_repo(llvm, "llvm")
+use_repo(ollvm, "llvm")
 
-llvm.llvm_c_sdk()
-use_repo(llvm, "llvm_c_sdk")
+ollvm.llvm_c_sdk()
+use_repo(ollvm, "llvm_c_sdk")
 
 register_toolchains("@llvm//toolchain:all")
 
@@ -77,6 +77,28 @@ register_toolchains("@llvm//toolchain:all")
 
 # clang.c_sdk()
 # use_repo(clang, "clang_c_sdk")
+
+################################################################
+bazel_dep(name = "toolchains_llvm", version = "0.10.3")
+
+# To directly use a commit from GitHub, replace commit with the commit you want.
+# Otherwise, omit this block.
+git_override(
+  module_name = "toolchains_llvm",
+  commit = "42e0b400fe316797657ccc5d7d2f9bb6f13071d8",
+  remote = "https://github.com/grailbio/bazel-toolchain",
+)
+
+# Configure and register the toolchain.
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+   llvm_version = "16.0.0",
+)
+
+use_repo(llvm, "llvm_toolchain")
+# use_repo(llvm, "llvm_toolchain_llvm") # if you depend on specific tools in scripts
+
+# register_toolchains("@llvm_toolchain//:all")
 
 ################################################################
 bazel_dep(name = "platforms",    version = "0.0.7")

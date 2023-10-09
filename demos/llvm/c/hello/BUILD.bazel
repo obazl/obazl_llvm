@@ -15,15 +15,34 @@ cc_binary(
         "-x", "c",
         "-std=c11",
         "-I$(@llvm_c_sdk)/include",
-        "$(LLVM_CFLAGS)",
+
+        ## only with llvm tc
+        # "$(LLVM_CFLAGS)",
+
         # ", ".join("$(LLVM_CFLAGS)".split(" ")),
     ],
-    linkopts = LDFLAGS + LLVM_LINKOPTS,
+    features = [
+        # "opt",
+        # "dbg",
+        # "-default_compile_flags",
+        "llvm-lld"
+    ],
+    linkopts = LDFLAGS + LLVM_LINKOPTS + [
+        # "-whyload",
+        # "-Xlinker",
+        # "--print-dylib-search"
+    ],
     local_defines  = CDEFINES,
     deps = [
         "@llvm_c_sdk//include",
-        "@llvm_c_sdk//lib:all-libs",
-        # "@llvm_c_sdk//lib:LLVM", # shared lib?
+        "@llvm_c_sdk//lib:LLVMBinaryFormat",
+        "@llvm_c_sdk//lib:LLVMBitstreamReader",
+        "@llvm_c_sdk//lib:LLVMCore",
+        "@llvm_c_sdk//lib:LLVMDemangle",
+        "@llvm_c_sdk//lib:LLVMRemarks",
+        "@llvm_c_sdk//lib:LLVMSupport",
+        "@llvm_c_sdk//lib:LLVMTargetParser",
+        # "@llvm_c_sdk//lib:all-libs",
     ],
     toolchains = ["//:repo_paths"],
 )

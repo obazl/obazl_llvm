@@ -201,6 +201,7 @@ cc_library(
         root=wsroot,
         bld=rctx.attr.llvm_root),
                  "lib")
+
     rctx.symlink("{root}/libexec".format(
         root=wsroot,
         bld=rctx.attr.llvm_root),

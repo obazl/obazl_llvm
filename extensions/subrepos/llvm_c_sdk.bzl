@@ -25,39 +25,6 @@ archmap = {
 #     "WebAssembly", "X86", "XCore",
 # ]
 
-#####################
-def genlibsmap(rctx, components, libs):
-
-    libsmap = {}
-
-    stanzas = ""
-
-    for component,clibs in components.items():
-
-        stanza = """
-cc_library(name = "{c}-libs",
-           srcs = [{libs}])
-""".format(c=component,
-           libs= ", ".join(clibs))
-
-        stanzas = stanzas + stanza
-
-    libsmap["{{COMPONENTS}}"] = stanzas
-
-    stanzas = ""
-
-    for libname,filename in libs.items():
-
-        stanza = """
-cc_import(name = "{libname}",
-          static_library = "{fname}")
-""".format(libname=libname, fname = filename)
-        stanzas = stanzas + stanza
-
-    libsmap["{{EVERY_LIB}}"] = stanzas
-
-    return libsmap
-
 ###########################
 def _llvm_c_sdk_impl(rctx):
     # print("LLVM_SDK REPO RULE")
@@ -183,28 +150,11 @@ cc_library(
     # rctx.symlink("{root}/libcxx/include".format(root=wsroot),
     #              "sdk/c++/include")
 
-    rctx.symlink("{root}/lib".format(
-        root=wsroot,
-        bld=rctx.attr.llvm_root),
-                 "lib")
-    rctx.symlink("{root}/libexec".format(
-        root=wsroot,
-        bld=rctx.attr.llvm_root),
-                 "libexec")
+    rctx.symlink("{}/lib".format(wsroot), "lib")
+    rctx.symlink("{}/libexec".format(wsroot), "libexec")
 
     # print("CC: %s" % rctx.attr.components)
     # fail("STOP")
-
-    libsmap = genlibsmap(rctx,
-                         rctx.attr.components,
-                         rctx.attr.libs)
-    rctx.template(
-        "lib/BUILD.bazel",
-        # "BUILD.lib",
-        Label("//extensions/templates:BUILD.lib_pkg"),
-        substitutions = libsmap,
-        executable = False,
-    )
 
     xarch = rctx.os.arch.lower()
     arch = archmap[xarch]

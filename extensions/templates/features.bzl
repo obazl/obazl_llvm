@@ -107,8 +107,17 @@ def make_features(ctx):
                     flag_group(
                         flags = ctx.attr.opt_compile_flags,
                     ),
-                ] if ctx.attr.opt_compile_flags else []),
-                with_features = [with_feature_set(features = ["opt"])],
+                ] if ctx.attr.opt_compile_flags else [
+                    flag_group(
+                        flags = ["-DFOO"]
+                    ),
+                ]),
+                with_features = [
+                    with_feature_set(
+                        features = ["opt"],
+                        not_features = ["dbg"]
+                    )
+                ],
             ),
             flag_set(
                 actions = all_cpp_compile_actions + [ACTION_NAMES.lto_backend],
@@ -145,9 +154,9 @@ def make_features(ctx):
         ],
     )
 
-    dbg_feature = feature(name = "dbg")
+    dbg_feature = feature(name = "dbg", enabled = False)
 
-    opt_feature = feature(name = "opt")
+    opt_feature = feature(name = "opt", enabled = False)
 
     sysroot_feature = feature(
         name = "sysroot",
@@ -908,6 +917,23 @@ def make_features(ctx):
         ],
     )
 
+    llvm_lld_feature = feature(
+        name = "llvm-lld",
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.cpp_link_executable,
+                    ACTION_NAMES.lto_index_for_executable,
+                ],
+                flag_groups = [
+                    flag_group(
+                        flags = ["-fuse-ld=lld"]
+                    ),
+                ],
+            ),
+        ],
+    )
+
     dependency_file_feature = feature(
         name = "dependency_file",
         enabled = True,
@@ -1107,6 +1133,9 @@ def make_features(ctx):
             default_link_flags_feature,
             libraries_to_link_feature,
             user_link_flags_feature,
+
+            llvm_lld_feature,
+
             static_libgcc_feature,
             fdo_optimize_feature,
             supports_dynamic_linker_feature,
@@ -1129,6 +1158,9 @@ def make_features(ctx):
             default_link_flags_feature,
             fdo_optimize_feature,
             supports_dynamic_linker_feature,
+
+            llvm_lld_feature,
+
             dbg_feature,
             opt_feature,
             user_compile_flags_feature,

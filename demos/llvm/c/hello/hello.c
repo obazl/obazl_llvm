@@ -42,9 +42,9 @@ int main() {
     LLVMBuildRet(builder, LLVMConstInt(int_32_type, 0, false));
     // end
 
-    //LLVMDumpModule(module); // dump module to STDOUT
+    LLVMDumpModule(module); // dump module to STDOUT
     //FIXME: cmd line arg -o
-    LLVMPrintModuleToFile(module, "hello.ll", NULL);
+    /* LLVMPrintModuleToFile(module, "hello.ll", NULL); */
 
     // clean memory
     LLVMDisposeBuilder(builder);
